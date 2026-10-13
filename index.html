@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0d0f12">
+<title>素材工坊 · 汐音</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="lite.css">
+</head>
+<body>
+<div class="wrap">
+
+  <h1>素材工坊</h1>
+  <p class="sub">导入图片 · 框出想要的 · 白底抠掉 · 导出成贴纸</p>
+  <div class="litebar">图片只留在你这台手机里，<b>不上传</b>，没网也能用。切好点存就直接下载到相册或下载文件夹。</div>
+
+  <!-- 1 抓图 -->
+  <div class="card">
+    <h2>① 选图</h2>
+    <div class="row">
+      <input type="text" id="url" hidden>
+      <button class="gold" id="btnFetch" hidden>抓</button>
+      <label class="sm gold pick" for="fileIn">＋ 导入图片</label>
+      <input type="file" id="fileIn" accept="image/*" multiple hidden>
+    </div>
+    <div class="msg" id="msgFetch"></div>
+  </div>
+
+  <!-- 2 选图 -->
+  <div class="card hide" id="cardPick">
+    <h2>② 选图 <span class="hint" id="pickCount"></span></h2>
+    <div class="grid" id="grid"></div>
+    <div class="tip">点一张进编辑台。编辑台里改的东西，切换图片不会丢。</div>
+  </div>
+
+  <!-- 3 编辑 -->
+  <div class="card hide" id="cardEdit">
+
+    <!-- 画布：由 layout.js 搬到顶上的取景区，这里只占位 -->
+    <div class="stage" id="stage">
+      <div id="wrap"><canvas id="cv"></canvas><div id="boxes"></div></div>
+      <div class="zoomtip" id="zoomTip">1.0×</div>
+      <button class="zreset" id="zReset">复位</button>
+    </div>
+    <p class="tip" id="editTip2"></p>
+
+    <!-- ① 步骤行：撤销 / 重做 / 眼睛 / 还原 -->
+    <div class="steprow">
+      <button class="sm ico" id="btnUndo" title="返回上一步">&#8630;</button>
+      <button class="sm ico" id="btnRedo" title="回到下一步">&#8631;</button>
+      <button class="sm ico" id="btnEye" title="显示/隐藏框和源点">&#128065;</button>
+      <button class="sm danger" id="btnReset">还原</button>
+      <button class="sm ico" id="btnLine" title="框线换个颜色：金 / 银">&#9681;</button>
+      <button class="sm ico" id="btnUi" title="整体缩放">75%</button>
+      <span class="hint" id="editName"></span>
+    </div>
+
+    <!-- ② 工具行：位置不变，横着一条 -->
+    <div class="toolrow">
+      <div class="pill" id="tools">
+        <button data-tool="box" class="on">框选</button>
+        <button data-tool="erase">橡皮</button>
+        <button data-tool="fix">水印笔</button>
+        <button data-tool="pipe">吸管</button>
+        <button data-tool="wand">魔棒</button>
+        <button data-tool="clone">仿制图章</button>
+        <button data-tool="pan">看图</button>
+      </div>
+    </div>
+
+    <!-- ③ 参数条：跟着工具换意思。框选/吸管/魔棒＝吃掉多少边，橡皮/水印笔/图章＝大小，看图＝没有 -->
+    <div class="slider prow" id="prowTol">
+      <span id="tolLab">吃掉多少边</span>
+      <input type="range" id="tol" min="0" max="90" value="34">
+      <b id="tolV">34</b>
+    </div>
+    <div class="slider prow hide" id="prowBrush">
+      <span id="brushLab">橡皮大小</span>
+      <input type="range" id="brush" min="6" max="90" value="30">
+      <b id="brushV">30</b>
+    </div>
+
+    <!-- 跟着工具出现的那几组按钮 -->
+    <div class="row">
+      <button class="sm on" id="btnAlpha">底色已抠掉</button>
+      <button class="sm" id="btnEdge">边缘收一圈</button>
+      <span class="swatch" id="swatch" title="当前认出来的底色"></span>
+      <span class="skey" id="skey"></span>
+    </div>
+    <div class="row hide" id="rowFix">
+      <button class="sm gold" id="btnFix">修掉涂的地方</button>
+      <button class="sm" id="btnFixUndo">清掉涂痕</button>
+      <button class="sm" id="btnFixBack">退回修复前</button>
+    </div>
+    <div class="row hide" id="rowClone">
+      <button class="sm gold" id="btnSrc">重设源点</button>
+      <button class="sm" id="btnLock" title="锁住源点：拖多长都从同一处取样，可以拿来盖一串花">&#128274; 固定源点</button>
+      <span class="slider" style="flex:1 1 120px;margin:0"><span>间距</span>
+        <input type="range" id="gap" min="0" max="200" value="100"><b id="gapV">1.0×</b></span>
+    </div>
+    <div class="row hide" id="rowAlgo">
+      <select id="algo" style="flex:1 1 100%;min-width:0">
+        <option value="patch">纹理修复 · 保花纹</option>
+        <option value="telea">Telea · 空白底最干净</option>
+        <option value="ns">流体 · 大块破损</option>
+      </select>
+    </div>
+
+    <!-- 说明收起来，想看再点 -->
+    <details class="howto">
+      <summary>怎么用</summary>
+      <div class="tip" id="editTip">
+        框选：在图上拖出一个框（太小的框会被当成误触丢掉），右下角圆点改大小，右上角叉删掉。一张图能框好几块，各自导出成独立贴纸。<br>
+        橡皮：水印压在素材上的时候，涂掉它。涂错了点撤销。
+      </div>
+    </details>
+  </div>
+
+  <!-- 3.5 贴纸边：画布在上面的贴纸台里，这儿只放参数 -->
+  <div class="card hide" id="cardEdge">
+
+    <div class="slider"><span>白边厚度</span>
+      <input type="range" id="bw" min="0" max="40" value="12"><b id="bwV">12</b></div>
+
+    <div class="matline">
+      <div class="mats one" id="edgeColor">
+        <button data-c="#ffffff" class="on">纯白</button>
+        <button data-c="nacre">贝母</button>
+        <button data-c="nacre_pink">粉贝</button>
+        <button data-c="nacre_black">黑蝶贝</button>
+        <button data-c="nacre_gold">金贝</button>
+        <button data-c="gold_foil">金箔</button>
+        <button data-c="silver_brush">拉丝银葱</button>
+        <button data-c="porcelain">瓷白</button>
+        <button data-c="glitter_duo">双闪银葱</button>
+        <button data-c="holo">镭射</button>
+        <button data-c="holo_flame">镭射火焰</button>
+        <button data-c="#0d0f12">纯黑</button>
+        <button data-c="custom">自定义</button>
+      </div>
+    </div>
+
+    <div class="slider"><span>第二圈</span>
+      <input type="range" id="ow" min="0" max="24" value="0"><b id="owV">0</b></div>
+
+    <div class="matline hide" id="rowOuter">
+      <div class="mats one" id="outerColor">
+        <button data-c="gold_foil" class="on">金箔</button>
+        <button data-c="nacre">贝母</button>
+        <button data-c="nacre_black">黑蝶贝</button>
+        <button data-c="silver_brush">拉丝银葱</button>
+        <button data-c="glitter_duo">双闪银葱</button>
+        <button data-c="holo">镭射</button>
+        <button data-c="holo_flame">镭射火焰</button>
+        <button data-c="#ffffff">纯白</button>
+        <button data-c="#0d0f12">纯黑</button>
+        <button data-c="custom">自定义</button>
+      </div>
+    </div>
+
+    <div class="slider hide" id="rowFreq"><span>纹理缩放</span>
+      <input type="range" id="freq" min="4" max="64" value="16"><b id="freqV">1.0×</b></div>
+
+    <!-- 自选色：独立一块，收起来完全不占地方 -->
+    <details class="fold hide" id="boxCustom">
+      <summary>自选色 · 调颜色和叠纹理</summary>
+      <div class="row" style="align-items:center">
+        <span class="lb">自选色</span>
+        <div class="stops" id="stops"></div>
+      </div>
+      <div class="row">
+        <div class="quick" id="quickC">
+          <button data-q="#002fa7" style="--q:#002fa7" title="克莱因蓝"></button>
+          <button data-q="#0d0f12" style="--q:#0d0f12" title="墨黑"></button>
+          <button data-q="#f4c7d4" style="--q:#f4c7d4" title="樱粉"></button>
+          <button data-q="#c8e6d8" style="--q:#c8e6d8" title="薄荷"></button>
+          <button data-q="#d8cdee" style="--q:#d8cdee" title="丁香紫"></button>
+          <button data-q="#f0e0c0" style="--q:#f0e0c0" title="香槟"></button>
+          <button data-q="#8f1d2c" style="--q:#8f1d2c" title="酒红"></button>
+          <button data-q="#1f6f5c" style="--q:#1f6f5c" title="松绿"></button>
+          <button data-q="#ffffff" style="--q:#ffffff" title="纯白"></button>
+        </div>
+      </div>
+      <div class="matline">
+        <div class="mats one" id="cTex">
+          <button data-t="none" class="on">不叠</button>
+          <button data-t="silver_brush">拉丝银葱</button>
+          <button data-t="porcelain">瓷白</button>
+          <button data-t="gold_foil">金箔</button>
+          <button data-t="nacre">贝母</button>
+          <button data-t="nacre_black">黑蝶贝</button>
+          <button data-t="glitter_duo">双闪</button>
+          <button data-t="holo">镭射</button>
+          <button data-t="holo_flame">镭射火焰</button>
+        </div>
+      </div>
+      <div class="slider hide" id="rowMix"><span>纹理强度</span>
+        <input type="range" id="cMix" min="0" max="100" value="65"><b id="cMixV">65%</b></div>
+      <div class="slider hide" id="rowBleed"><span>透色</span>
+        <input type="range" id="cBleed" min="0" max="100" value="30"><b id="cBleedV">30%</b></div>
+      <div class="slider"><span>角度</span>
+        <input type="range" id="cAngle" min="0" max="180" value="45"><b id="cAngleV">45°</b></div>
+      <div class="slider"><span>颗粒</span>
+        <input type="range" id="cGrain" min="0" max="40" value="6"><b id="cGrainV">6%</b></div>
+    </details>
+
+    <!-- 我的配方 -->
+    <div class="row" style="margin-top:12px">
+      <select id="recipe" style="flex:1 1 130px"></select>
+      <button class="sm" id="btnRecSave">存这套</button>
+      <button class="sm danger" id="btnRecDel">删</button>
+    </div>
+
+    <div class="row">
+      <button class="sm gold" id="btnToEdit">存了去修</button>
+      <span class="hint">把这块带边贴纸送回编辑台，用橡皮、仿制图章再细化</span>
+    </div>
+
+    <div class="msg" id="msgEdge"></div>
+
+    <details class="howto">
+      <summary>怎么用</summary>
+      <div class="tip">白边厚度 0 就是不加边。第二圈是在白边外面再套一圈，像谷子那种双层模切。材质是真纹理贴图不是色块：金箔有褶皱和镜面高光，拉丝银葱是单向丝纹加碎闪，双闪是两色闪点，瓷白是哑光缎面。「纹理缩放」往左纹路细密、往右放大。<br>
+      自选色：单色就留一个色块，双色多色点＋加（最多 6 个）。快捷色是一键换成单色。「叠纹理」把真材质的明暗和闪点压在你选的颜色上——克莱因蓝叠拉丝银葱是蓝丝绒带银丝，叠金箔是蓝底描金。「纹理强度」管压多狠，「透色」管纹理自己那点颜色漏多少（镭射往右拉才有虹彩）。<br>
+      切了好几块时，上面画布底下那条缩略图点一下就换着看；这套边是套给全部切块的。</div>
+    </details>
+  </div>
+
+  <!-- 5 导出 -->
+  <div class="card hide" id="cardOut">
+    <h2>⑤ 导出</h2>
+    <div class="row">
+      <div class="grow">
+        <label class="fld">格式</label>
+        <select id="fmt">
+          <option value="png">PNG · 带透明，贴纸用这个</option>
+          <option value="webp">WebP · 带透明，更小</option>
+          <option value="gif">GIF · 单帧，留着以后做动图</option>
+          <option value="jpeg">JPEG · 不带透明，得配底色</option>
+        </select>
+      </div>
+      <div class="grow">
+        <label class="fld">尺寸</label>
+        <select id="size">
+          <option value="512">512 见方 · 居中留白</option>
+          <option value="256">256 见方 · 居中留白</option>
+          <option value="orig">原始裁切尺寸</option>
+        </select>
+      </div>
+    </div>
+    <div class="row" id="rowBg" style="display:none">
+      <div class="grow">
+        <label class="fld">JPEG 底色</label>
+        <input type="text" id="bg" value="#ffffff" placeholder="#ffffff">
+      </div>
+    </div>
+    <div class="row">
+      <div class="grow">
+        <label class="fld">命名前缀</label>
+        <input type="text" id="stem" placeholder="留空就用图片名">
+      </div>
+    </div>
+    <div class="msg" id="msgOut"></div>
+  </div>
+
+  <!-- 5 素材库 -->
+  <div class="card hide" id="cardLib">
+    <h2>⑥ 素材库 <span class="hint" id="libCount"></span></h2>
+    <div class="lib" id="lib"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="sm" id="btnSelAll">全选 / 全不选</button>
+      <button class="sm" id="btnSelNew">只选新的</button>
+      <button class="sm gold" id="btnSaveSel" disabled>存选中的</button>
+      <button class="sm danger" id="btnDelSel" disabled>删选中的</button>
+      <span class="selc" id="selCount"></span>
+    </div>
+    <div class="row">
+      <button class="sm" id="btnZip">整包下载</button>
+      <button class="sm" id="btnRefresh">刷新</button>
+    </div>
+    <p class="msg" id="msgLib"></p>
+    <div class="row" style="display:none">
+    </div>
+  </div>
+
+</div>
+
+<div class="bar">
+  <div class="wrapb">
+    <button id="btnCut" disabled>切出来</button>
+    <button class="gold" id="btnSave" disabled>存进素材库</button>
+  </div>
+</div>
+<div class="litefoot">素材工坊 · 汐音 &nbsp;·&nbsp; Celene &amp; Arin</div>
+
+<script src="core.js"></script>
+<script src="lite.js"></script>
+<script src="cutout.js"></script>
+<script src="sticker.js"></script>
+<script src="app.js"></script>
+<script src="shell.js"></script>
+<script src="viewer.js"></script>
+<script src="edge.js"></script>
+</body>
+</html>

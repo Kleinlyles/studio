@@ -1,0 +1,6 @@
+/* 删减版：藏掉要靠电脑才能跑的那几样 */
+#rowFix, #rowAlgo, #btnFix, #btnFixUndo, #btnFixBack, #cardLib { display: none !important; }
+#tools button[data-tool="fix"] { display: none !important; }
+.litebar{max-width:860px;margin:0 auto;padding:10px 14px 0;color:#9aa0a8;font-size:12px;line-height:1.7}
+.litebar b{color:#d9b36c;font-weight:600}
+.litefoot{text-align:center;color:#6d737b;font-size:11px;padding:18px 0 26px;letter-spacing:.5px}
