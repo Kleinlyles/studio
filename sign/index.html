@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<base href="../">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0d0f12">
+<title>名字贴工坊 · 汐音</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<style>
+/* 独立版：预览钉顶上，操作台在下面滑。没有素材库和编辑台，那两个按钮藏掉 */
+body{overflow:hidden;padding:0}
+.wrap{display:flex;flex-direction:column;height:100dvh;max-width:none;margin:0;padding:0}
+.stagehost{flex:0 0 auto;background:#07080a;border-bottom:1px solid var(--line);
+  padding:8px 10px 6px}
+.panels{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 20px}
+.card{background:none;border:0;border-radius:0;padding:0;margin:0}
+#cardSig>h2{display:none}
+#sigToEdge{display:none}
+.foot{padding:14px 2px 4px;color:var(--dim2);font-size:11px;line-height:1.7}
+.foot a{color:var(--gold)}
+.topline{padding:8px 12px 0;color:var(--gold);font-size:13px;letter-spacing:.1em}
+.topline small{color:var(--dim2);letter-spacing:0;margin-left:8px;font-size:11px}
+</style>
+</head>
+<body data-tab="cardSig">
+<div class="wrap">
+  <div class="topline">名字贴工坊<small>花纹 × 颜色各自选 · 出透明底 PNG</small></div>
+  <div class="stagehost" id="sigHost"></div>
+  <div class="panels">
+    <div class="card on" id="cardSig">
+      <h2>签名</h2>
+      <div id="sigRoot"></div>
+      <p class="foot">存进素材库的签名，在 <a href="./">抠图站</a> 的素材库「文字」栏里。<br>
+      © Celene · 名字贴工坊 · CC BY-NC-ND 4.0（转载请署名原作者，禁止商用与二改）</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* 独立版垫片：工坊那套砖要的几个公用件，这儿只给最小一份。
+   没有后端，所以「存进素材库」「拿去加贴纸边」藏起来，只留直接下载。 */
+window.$ = function (id) { return document.getElementById(id); };
+window.BUS = {on: function () {}, emit: function () {}};
+window.say = function (el, t, cls) { if (el) { el.textContent = t; el.className = 'msg' + (cls ? ' ' + cls : ''); } };
+window.api = async function (p) { throw new Error('这一版用不了：' + p); };
+window.toEdit = async function () { throw new Error('这一版没有编辑台'); };
+window.goTab = function () {};
+window.addEventListener('error', function (e) {
+  var b = document.getElementById('errbar');
+  if (!b) { b = document.createElement('div'); b.id = 'errbar'; document.body.appendChild(b); }
+  b.textContent = '脚本出错 ▸ ' + (e.message || '') + '  @' +
+    String(e.filename || '').split('/').pop() + ':' + e.lineno;
+});
+</script>
+<script src="lite.js"></script>
+<script src="sig.js"></script>
+<script src="sigui.js"></script>
+</body>
+</html>

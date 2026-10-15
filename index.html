@@ -13,7 +13,7 @@
 <div class="wrap">
 
   <h1>素材工坊</h1>
-  <p class="sub">导入图片 · 框出想要的 · 白底抠掉 · 导出成贴纸</p>
+  <p class="sub">导入图片 · 框出想要的 · 白底抠掉 · 签名 · 导出成贴纸</p>
   <div class="litebar">图片只留在你这台手机里，<b>不上传</b>，没网也能用。切好点存就直接下载到相册或下载文件夹。</div>
 
   <!-- 1 抓图 -->
@@ -265,6 +265,12 @@
     <div class="msg" id="msgOut"></div>
   </div>
 
+  <!-- 6 签名（名字贴）：跟汐音 costume 同一套算法，出透明底 PNG -->
+  <div class="card" id="cardSig">
+    <h2>&#9998; 签名</h2>
+    <div id="sigRoot"></div>
+  </div>
+
   <!-- 5 素材库 -->
   <div class="card hide" id="cardLib">
     <h2>⑥ 素材库 <span class="hint" id="libCount"></span></h2>
@@ -303,5 +309,11 @@
 <script src="shell.js"></script>
 <script src="viewer.js"></script>
 <script src="edge.js"></script>
+<script src="sig.js"></script>
+<script src="sigui.js"></script>
+<script src="draft.js"></script>
+<p style="text-align:center;color:#6b7078;font-size:11px;line-height:1.8;padding:18px 12px 28px">
+<a href="sign/" style="color:#d9b36c">✎ 单独的名字贴工坊</a><br>
+© Celene · 小红书素材工坊 · CC BY-NC-ND 4.0（转载请署名原作者，禁止商用与二改）</p>
 </body>
 </html>
