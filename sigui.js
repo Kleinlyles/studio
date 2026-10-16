@@ -12,7 +12,7 @@
   <p class="msg" id="sigMsg"></p>
 
   <div class="row">
-    <input type="text" id="sigTxt" placeholder="写点英文花体，打 ♡ 或 × 会自己排">
+    <textarea id="sigTxt" rows="2" placeholder="写点英文花体，打 ♡ 或 × 会自己排；回车换行"></textarea>
   </div>
 
   <div class="sigrow"><label class="fld">预设搭配</label><div class="sigchips" id="sigPre"></div></div>
