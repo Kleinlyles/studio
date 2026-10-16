@@ -312,8 +312,10 @@
 <script src="sig.js"></script>
 <script src="sigui.js"></script>
 <script src="draft.js"></script>
-<p style="text-align:center;color:#6b7078;font-size:11px;line-height:1.8;padding:18px 12px 28px">
+<p id="creditFoot" style="text-align:center;color:#6b7078;font-size:11px;line-height:1.8;padding:18px 12px 28px">
 <a href="sign/" style="color:#d9b36c">✎ 单独的名字贴工坊</a><br>
 © Celene · 小红书素材工坊 · CC BY-NC-ND 4.0（转载请署名原作者，禁止商用与二改）</p>
+<script>/* 分页布局下整页不滚，署名和跳转挪进会滚的面板里，划到底就看得到 */
+(function(){var pn=document.getElementById('panels');if(!pn)return;['.litefoot','#creditFoot'].forEach(function(s){var e=document.querySelector(s);if(e)pn.appendChild(e)})})();</script>
 </body>
 </html>
