@@ -86,6 +86,9 @@
     <div class="row">
       <button class="sm on" id="btnAlpha">底色已抠掉</button>
       <button class="sm" id="btnEdge">边缘收一圈</button>
+      <button class="sm" id="btnDf" title="章、签名、单色字用：按纸色到墨色算每个点有几成墨当透明度，去掉边上粉白的混色">去白边</button>
+      <span class="hide" id="inkBox" style="display:inline-flex;align-items:center;gap:4px"><span class="swatch" id="inkSw" style="cursor:pointer"></span><span class="skey" id="inkLab">墨色</span></span>
+      <button class="sm" id="btnDrop" title="切出来时删掉跟主体不连着的小碎块。章、签名里的小字和点会被当成碎点，切章时关掉">去碎点 开</button>
       <span class="swatch" id="swatch" title="当前认出来的底色"></span>
       <span class="skey" id="skey"></span>
     </div>
@@ -303,9 +306,9 @@
 
 <script src="core.js"></script>
 <script src="lite.js"></script>
-<script src="cutout.js"></script>
+<script src="cutout.js?v=1018c"></script>
 <script src="sticker.js"></script>
-<script src="app.js?v=1018b"></script>
+<script src="app.js?v=1018c"></script>
 <script src="shell.js"></script>
 <script src="viewer.js"></script>
 <script src="edge.js"></script>
